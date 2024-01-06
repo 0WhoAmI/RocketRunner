@@ -7,8 +7,34 @@
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <link rel="stylesheet" href="styles/index.css" />
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r79/three.min.js"></script>
-    <script src="scripts/game.js"></script>
     <script src="scripts/main.js"></script>
+    <script src="scripts/game.js"></script>
+    <script src="scripts/lerp.js"></script>
   </head>
-  <body></body>
+  <body>
+    <div id="info">
+      <div id="title">Captain's log</div>
+      <div class="divider"></div>
+      <div id="score-row">
+        Score:
+        <div id="score"></div>
+      </div>
+      <div id="distance-row">
+        Distance:
+        <div id="distance"></div>
+      </div>
+      <div class="divider"></div>
+      <div>Ship's Integrity:</div>
+      <div id="health-bar">
+        <div id="health"></div>
+      </div>
+    </div>
+
+    <div id="intro-panel">
+      <div id="intro-column">
+        <div id="intro-title">RocketRunner</div>
+        <button id="start-button">Start</button>
+      </div>
+    </div>
+  </body>
 </html>

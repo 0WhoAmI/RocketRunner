@@ -1,11 +1,37 @@
 class Game {
   OBSTACLE_PREFAB = new THREE.BoxGeometry(1, 1, 1);
   OBSTACLE_MATERIAL = new THREE.MeshBasicMaterial({ color: 0xccdeee });
-
   BONUS_PREFAB = new THREE.SphereGeometry(1, 12, 12);
+  COLLISION_THRESHOLD = 0.2;
 
   constructor(scene, camera) {
+    // initialize variables
+    this.running = false;
+
     this.speedZ = 20;
+    this.speedX = 0; // -1: left, 0: straight, 1: right
+    this.rotationLerpSpeed = 25; // how fast shipp rotate
+    this.shipMovementXSpeed = -0.15; // how fast ship go left or right (less value = go faster)
+    this.translateX = 0;
+
+    this.health = 100;
+    this.score = 0;
+
+    this.rotationLerp = null;
+
+    this.divScore = document.getElementById("score");
+    this.divDistance = document.getElementById("distance");
+    this.divHealth = document.getElementById("health");
+
+    document.getElementById("start-button").onclick = () => {
+      this.running = true;
+      document.getElementById("intro-panel").style.display = "none";
+    };
+
+    // show initial values
+    this.divScore.innerText = this.score;
+    this.divDistance.innerText = 0;
+    this.divHealth.style.width = this.health + "%";
 
     // prepare 3D scene
     this._initializeScene(scene, camera);
@@ -16,20 +42,67 @@ class Game {
   }
 
   update() {
-    this.time += this.clock.getDelta();
+    if (!this.running) {
+      return;
+    }
+
+    const timeDelta = this.clock.getDelta();
+    this.time += timeDelta;
+
+    if (this.rotationLerp !== null) {
+      this.rotationLerp.update(timeDelta);
+    }
+
+    this.translateX += this.speedX * this.shipMovementXSpeed;
 
     this._updateGrid();
     this._checkCollisions();
     this._updateInfoPanel();
   }
 
-  _keydown(event) {}
+  _keydown(event) {
+    let newSpeedX;
+    switch (event.key) {
+      case "ArrowLeft":
+        newSpeedX = -1.0;
+        break;
+      case "ArrowRight":
+        newSpeedX = 1.0;
+        break;
+      default:
+        return;
+    }
 
-  _keyup() {}
+    if (this.speedX !== newSpeedX) {
+      this.speedX = newSpeedX;
+      this._rotateShip(
+        (-this.speedX * this.rotationLerpSpeed * Math.PI) / 180,
+        0.8
+      );
+    }
+  }
+
+  _keyup() {
+    this.speedX = 0;
+    this._rotateShip(0, 0.5);
+  }
+
+  _rotateShip(targetRotation, delay) {
+    const $this = this;
+    this.rotationLerp = new Lerp(this.ship.rotation.z, targetRotation, delay)
+      .onUpdate((value) => {
+        $this.ship.rotation.z = value;
+      })
+      .onFinish(() => {
+        $this.rotationLerp = null;
+      });
+  }
 
   _updateGrid() {
     this.grid.material.uniforms.time.value = this.time;
     this.objectsParent.position.z = this.speedZ * this.time;
+    this.grid.material.uniforms.translateX.value = this.translateX;
+    this.objectsParent.position.x = this.translateX;
 
     this.objectsParent.traverse((child) => {
       if (child instanceof THREE.Mesh) {
@@ -39,23 +112,58 @@ class Game {
           // reset the object
           const params = [
             child,
-            this.ship.position.x,
+            -this.translateX,
             -this.objectsParent.position.z,
           ];
 
           if (child.userData.type === "obstacle") {
             this._setupObstacle(...params);
           } else {
-            this._setupBonus(...params);
+            const price = this._setupBonus(...params);
+            child.userData.price = price;
           }
         }
       }
     });
   }
 
-  _checkCollisions() {}
+  _checkCollisions() {
+    this.objectsParent.traverse((child) => {
+      if (child instanceof THREE.Mesh) {
+        // pos in world space
+        const childZPos = child.position.z + this.objectsParent.position.z;
 
-  _updateInfoPanel() {}
+        // threshold distance
+        const thresholdX = this.COLLISION_THRESHOLD + child.scale.x / 2;
+        const thresholdZ = this.COLLISION_THRESHOLD + child.scale.z / 2;
+
+        if (
+          childZPos > -thresholdZ &&
+          Math.abs(child.position.x + this.translateX) < thresholdX
+        ) {
+          // collision!
+          const params = [
+            child,
+            -this.translateX,
+            -this.objectsParent.position.z,
+          ];
+          if (child.userData.type === "obstacle") {
+            this.health -= 20;
+            this.divHealth.style.width = this.health + "%";
+            this._setupObstacle(...params);
+          } else {
+            this.score += child.userData.price;
+            this.divScore.innerText = this.score;
+            child.userData.price = this._setupBonus(...params);
+          }
+        }
+      }
+    });
+  }
+
+  _updateInfoPanel() {
+    this.divDistance.innerText = this.objectsParent.position.z.toFixed(0);
+  }
 
   _gameOver() {}
 
@@ -147,11 +255,17 @@ class Game {
       0xccddee
     );
 
+    const moveableX = [];
     const moveableZ = [];
     for (let i = 0; i <= divisions; i++) {
+      moveableX.push(0, 0, 1, 1); // move vertical lines only (1 - point is moveableZ)
       moveableZ.push(1, 1, 0, 0); // move horizontal lines only (1 - point is moveableZ)
     }
 
+    this.grid.geometry.addAttribute(
+      "moveableX",
+      new THREE.BufferAttribute(new Uint8Array(moveableX), 1)
+    );
     this.grid.geometry.addAttribute(
       "moveableZ",
       new THREE.BufferAttribute(new Uint8Array(moveableZ), 1)
@@ -168,13 +282,18 @@ class Game {
         speedZ: {
           value: this.speedZ,
         },
+        translateX: {
+          value: this.translateX,
+        },
       },
       vertexShader: `
         uniform float time;
         uniform vec2 gridLimits;
         uniform float speedZ;
+        uniform float translateX;
         
         attribute float moveableZ;
+        attribute float moveableX;
         
         varying vec3 vColor;
       
@@ -182,9 +301,14 @@ class Game {
           vColor = color;
           float limLen = gridLimits.y - gridLimits.x;
           vec3 pos = position;
+          if (floor(moveableX + 0.5) > 0.5){ // if a point has "moveableX" attribute = 1 
+            float xDist = translateX;
+            float curXPos = mod((pos.x + xDist) - gridLimits.x, limLen) + gridLimits.x;
+            pos.x = curXPos;
+          }
           if (floor(moveableZ + 0.5) > 0.5){ // if a point has "moveableZ" attribute = 1 
-            float dist = speedZ * time;
-            float curZPos = mod((pos.z + dist) - gridLimits.x, limLen) + gridLimits.x;
+            float zDist = speedZ * time;
+            float curZPos = mod((pos.z + zDist) - gridLimits.x, limLen) + gridLimits.x;
             pos.z = curZPos;
           } 
           gl_Position = projectionMatrix * modelViewMatrix * vec4(pos,1.0);
@@ -213,13 +337,12 @@ class Game {
     this.objectsParent = new THREE.Group();
     scene.add(this.objectsParent);
 
-    for (let i = 0; i < 10; i++) {
+    for (let i = 0; i < 20; i++) {
       this._spawnObstacle();
+    }
+    for (let i = 0; i < 10; i++) {
       this._spawnBonus();
     }
-    // for (let i = 0; i < 10; i++) {
-    //   this._spawnBonus();
-    // }
 
     camera.rotateX((-20 * Math.PI) / 180);
     camera.position.set(0, 1.5, 2);
@@ -256,8 +379,8 @@ class Game {
       new THREE.MeshBasicMaterial({ color: 0x000000 })
     );
 
-    this._setupBonus(obj);
-    obj.userData = { type: "bonus" };
+    const price = this._setupBonus(obj);
+    obj.userData = { type: "bonus", price };
     this.objectsParent.add(obj);
   }
 
@@ -277,6 +400,8 @@ class Game {
       obj.scale.y * 0.5,
       refZPos - 100 - this._randomFloat(0, 100)
     );
+
+    return price;
   }
 
   _randomFloat(min, max) {
