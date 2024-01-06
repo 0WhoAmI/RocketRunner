@@ -10,7 +10,7 @@ function setupAudio() {
     loop: true,
   });
   const musicId = musicAudio.play();
-  musicAudio.fade(0, 0.008, 500, musicId);
+  musicAudio.fade(0, 0.01, 500, musicId);
 
   //sound effects
   soundBonusAudio = new Howl({
