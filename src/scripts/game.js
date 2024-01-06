@@ -10,16 +10,17 @@ class Game {
     this.divHealth = document.getElementById("health");
 
     this.divGameOverPanel = document.getElementById("game-over-panel");
+    this.divGameOverPanel.className = "hidden";
     this.divGameOverScore = document.getElementById("game-over-score");
     this.divGameOverDistance = document.getElementById("game-over-distance");
 
     document.getElementById("start-button").onclick = () => {
       this.running = true;
-      document.getElementById("intro-panel").style.display = "none";
+      document.getElementById("intro-panel").classList.add("hidden");
     };
     document.getElementById("replay-button").onclick = () => {
       this.running = true;
-      this.divGameOverPanel.style.display = "none";
+      this.divGameOverPanel.classList.add("hidden");
     };
 
     this.scene = scene;
@@ -42,6 +43,9 @@ class Game {
     if (this.rotationLerp !== null) {
       this.rotationLerp.update(timeDelta);
     }
+    if (this.cameraLerp !== null) {
+      this.cameraLerp.update(timeDelta);
+    }
 
     this.translateX += this.speedX * this.shipMovementXSpeed;
 
@@ -54,19 +58,22 @@ class Game {
     // initialize variables
     this.running = false;
 
+    this.numberOfObsticles = 10;
+
     this.speedZ = 20;
     this.speedX = 0; // -1: left, 0: straight, 1: right
     this.rotationLerpSpeed = 25; // how fast shipp rotate
-    this.shipMovementXSpeed = -0.15; // how fast ship go left or right (less value = go faster)
+    this.shipMovementXSpeed = -0.1; // how fast ship go left or right (less value = go faster)
     this.translateX = 0;
 
     this.time = 0;
     this.clock = new THREE.Clock();
 
-    this.health = 20; // TODO: 100;
+    this.health = 100;
     this.score = 0;
 
     this.rotationLerp = null;
+    this.cameraLerp = null;
 
     // show initial values
     this.divScore.innerText = this.score;
@@ -116,6 +123,10 @@ class Game {
   }
 
   _updateGrid() {
+    this.numberOfObsticles += 1;
+
+    this.speedZ += 0.002;
+    this.grid.material.uniforms.speedZ.value = this.speedZ;
     this.grid.material.uniforms.time.value = this.time;
     this.objectsParent.position.z = this.speedZ * this.time;
     this.grid.material.uniforms.translateX.value = this.translateX;
@@ -132,7 +143,7 @@ class Game {
             -this.translateX,
             -this.objectsParent.position.z,
           ];
-
+          
           if (child.userData.type === "obstacle") {
             this._setupObstacle(...params);
           } else {
@@ -168,11 +179,27 @@ class Game {
             this.health -= 20;
             this.divHealth.style.width = this.health + "%";
             this._setupObstacle(...params);
+            this._shakeCamera({
+              x: this.camera.position.x,
+              y: this.camera.position.y,
+              z: this.camera.position.z,
+            });
 
+            if (soundCrashAudio && this.health > 0) {
+              soundCrashAudio.play();
+            }
             if (this.health <= 0) {
+              if (soundLastCrashAudio) {
+                soundLastCrashAudio.play();
+              }
               this._gameOver();
             }
           } else {
+            if (soundBonusAudio) {
+              soundBonusAudio.play();
+            }
+
+            this._createScorePopup(child.userData.price);
             this.score += child.userData.price;
             this.divScore.innerText = this.score;
             child.userData.price = this._setupBonus(...params);
@@ -194,12 +221,10 @@ class Game {
     this.divGameOverScore.innerText = this.score;
     this.divGameOverDistance.innerText =
       this.objectsParent.position.z.toFixed(0);
-    setTimeout(() => {
-      this.divGameOverPanel.style.display = "grid";
+    this.divGameOverPanel.classList.remove("hidden");
 
-      //reset variables
-      this._reset(true);
-    }, 500);
+    //reset variables
+    this._reset(true);
   }
 
   _createShip(scene) {
@@ -293,7 +318,7 @@ class Game {
     const moveableX = [];
     const moveableZ = [];
     for (let i = 0; i <= divisions; i++) {
-      moveableX.push(0, 0, 1, 1); // move vertical lines only (1 - point is moveableZ)
+      moveableX.push(0, 0, 1, 1); // move vertical lines only (1 - point is moveableX)
       moveableZ.push(1, 1, 0, 0); // move horizontal lines only (1 - point is moveableZ)
     }
 
@@ -333,7 +358,6 @@ class Game {
         varying vec3 vColor;
       
         void main() {
-          vColor = color;
           float limLen = gridLimits.y - gridLimits.x;
           vec3 pos = position;
           if (floor(moveableX + 0.5) > 0.5){ // if a point has "moveableX" attribute = 1 
@@ -346,6 +370,8 @@ class Game {
             float curZPos = mod((pos.z + zDist) - gridLimits.x, limLen) + gridLimits.x;
             pos.z = curZPos;
           } 
+          float k = 1.0 - (-pos.z / 200.0);
+          vColor = color * k;
           gl_Position = projectionMatrix * modelViewMatrix * vec4(pos,1.0);
         }
       `,
@@ -452,6 +478,57 @@ class Game {
     );
 
     return price;
+  }
+
+  _shakeCamera(initialPosition, remainingShakes = 3) {
+    const $this = this;
+
+    const startPosition = {
+      x: this.camera.position.x,
+      y: this.camera.position.y,
+      z: this.camera.position.z,
+    };
+
+    const startOffset = { x: 0, y: 0 };
+    const endOffset = {
+      x: this._randomFloat(-0.25, 0.25),
+      y: this._randomFloat(-0.25, 0.25),
+    };
+
+    this.cameraLerp = new Lerp(
+      startOffset,
+      endOffset,
+      this._randomFloat(0.1, 0.22)
+    )
+      .onUpdate((value) => {
+        this.camera.position.set(
+          startPosition.x + value.x,
+          startPosition.y + value.y,
+          startPosition.z
+        );
+      })
+      .onFinish(() => {
+        if (remainingShakes > 0) {
+          $this._shakeCamera(initialPosition, remainingShakes - 1);
+        } else {
+          $this.cameraLerp = null;
+          $this.camera.position.set(
+            initialPosition.x,
+            initialPosition.y,
+            initialPosition.z
+          );
+        }
+      });
+  }
+
+  _createScorePopup(score) {
+    const scorePopup = document.createElement("div");
+    scorePopup.innerText = `+${score}`;
+    scorePopup.className = "score-popup";
+    document.body.appendChild(scorePopup);
+    setTimeout(() => {
+      scorePopup.remove();
+    }, 1000);
   }
 
   _randomFloat(min, max) {
