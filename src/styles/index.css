@@ -66,8 +66,6 @@ body {
   transition: opacity 1.5s ease-in-out;
 }
 
-
-
 #intro-panel.hidden,
 #game-over-panel.hidden{
   opacity: 0;

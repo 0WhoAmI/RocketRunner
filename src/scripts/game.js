@@ -10,7 +10,6 @@ class Game {
     this.divHealth = document.getElementById("health");
 
     this.divGameOverPanel = document.getElementById("game-over-panel");
-    this.divGameOverPanel.className = "hidden";
     this.divGameOverScore = document.getElementById("game-over-score");
     this.divGameOverDistance = document.getElementById("game-over-distance");
 
@@ -58,7 +57,8 @@ class Game {
     // initialize variables
     this.running = false;
 
-    this.numberOfObsticles = 10;
+    this.numberOfObstacles = 50;
+    this.numberOfBonuses = 10;
 
     this.speedZ = 20;
     this.speedX = 0; // -1: left, 0: straight, 1: right
@@ -123,8 +123,6 @@ class Game {
   }
 
   _updateGrid() {
-    this.numberOfObsticles += 1;
-
     this.speedZ += 0.002;
     this.grid.material.uniforms.speedZ.value = this.speedZ;
     this.grid.material.uniforms.time.value = this.time;
@@ -143,7 +141,7 @@ class Game {
             -this.translateX,
             -this.objectsParent.position.z,
           ];
-          
+
           if (child.userData.type === "obstacle") {
             this._setupObstacle(...params);
           } else {
@@ -397,10 +395,10 @@ class Game {
       this.objectsParent = new THREE.Group();
       scene.add(this.objectsParent);
 
-      for (let i = 0; i < 20; i++) {
+      for (let i = 0; i < this.numberOfObstacles; i++) {
         this._spawnObstacle();
       }
-      for (let i = 0; i < 10; i++) {
+      for (let i = 0; i < this.numberOfBonuses; i++) {
         this._spawnBonus();
       }
 
