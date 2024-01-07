@@ -16,13 +16,13 @@ git clone https://github.com/0WhoAmI/RocketRunner.git
 2.Navigate to the project directory:
 cd RocketRunner
 
-# Way1
+#### Way1
 3.Navigate to crs in project directory RocketRunner:
 cd RocketRunner\src
 
 4.Open index.html to play RocketRunner.
 
-# Way2
+#### Way2
 3.Open in Visual Studio Code
 
 4.Install extensions:
