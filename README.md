@@ -12,7 +12,7 @@ git clone https://github.com/0WhoAmI/RocketRunner.git
 2. Navigate to the project directory:
 cd RocketRunner
 
-### First way
+### First way (Cors blocked music - very loud)
 3. Navigate to crs in project directory RocketRunner:
 cd RocketRunner\src
 
@@ -25,7 +25,7 @@ cd RocketRunner\src
 Live Server
 
 5. Start Live Server:
-  * Shortcut: Ctrl + P
+ &nbsp* Shortcut: Ctrl + P
   * Type: ">"
   * Press enter on: "Live Server: Open with Live Server"
 
