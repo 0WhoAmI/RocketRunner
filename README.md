@@ -25,9 +25,9 @@ cd RocketRunner\src
 Live Server
 
 5. Start Live Server:
- &nbsp* Shortcut: Ctrl + P
-  * Type: ">"
-  * Press enter on: "Live Server: Open with Live Server"
+ * Shortcut: Ctrl + P
+ * Type: ">"
+ * Press enter on: "Live Server: Open with Live Server"
 
 6. Open your web browser and go to http://127.0.0.1:5500/src/ to play RocketRunner.
 
