@@ -67,7 +67,7 @@ body {
 }
 
 #intro-panel.hidden,
-#game-over-panel.hidden{
+#game-over-panel.hidden {
   opacity: 0;
   pointer-events: none;
 }
