@@ -13,27 +13,27 @@ To run RocketRunner locally, you need to:
 1. Clone the repository to your local machine:
 git clone https://github.com/0WhoAmI/RocketRunner.git
 
-2.Navigate to the project directory:
+2. Navigate to the project directory:
 cd RocketRunner
 
 #### First way
-3.Navigate to crs in project directory RocketRunner:
+3. Navigate to crs in project directory RocketRunner:
 cd RocketRunner\src
 
-4.Open index.html to play RocketRunner.
+4. Open index.html to play RocketRunner.
 
 #### Second way
-3.Open in Visual Studio Code
+3. Open in Visual Studio Code
 
-4.Install extensions:
+4. Install extensions:
 Live Server
 
-5.Start Live Server:
+5. Start Live Server:
 *Shortcut: Ctrl + P
 *Type: ">"
 *Press enter on: "Live Server: Open with Live Server"
 
-6.Open your web browser and go to http://127.0.0.1:5500/src/ to play RocketRunner.
+6. Open your web browser and go to http://127.0.0.1:5500/src/ to play RocketRunner.
 
 ## Usage
 
