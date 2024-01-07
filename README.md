@@ -16,24 +16,24 @@ git clone https://github.com/0WhoAmI/RocketRunner.git
 2.Navigate to the project directory:
 cd RocketRunner
 
-#### Way1
+### First way
 3.Navigate to crs in project directory RocketRunner:
 cd RocketRunner\src
 
 4.Open index.html to play RocketRunner.
 
-#### Way2
+### Second way
 3.Open in Visual Studio Code
 
 4.Install extensions:
 Live Server
 
 5.Start Live Server:
-Shortcut: Ctrl + P
-Type: >
-Press enter on: "Live Server: Open with Live Server"
+*Shortcut: Ctrl + P
+*Type: ">"
+*Press enter on: "Live Server: Open with Live Server"
 
-5.Open your web browser and go to http://127.0.0.1:5500/src/ to play RocketRunner.
+6.Open your web browser and go to http://127.0.0.1:5500/src/ to play RocketRunner.
 
 ## Usage
 
