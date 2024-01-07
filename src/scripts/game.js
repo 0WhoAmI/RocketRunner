@@ -14,6 +14,7 @@ class Game {
     this.divGameOverDistance = document.getElementById("game-over-distance");
 
     document.getElementById("start-button").onclick = () => {
+      musicAudio.play();
       this.running = true;
       document.getElementById("intro-panel").classList.add("hidden");
     };

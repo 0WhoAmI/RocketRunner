@@ -1,12 +1,13 @@
+var musicAudio;
 var soundBonusAudio;
 var soundCrashAudio;
 var soundLastCrashAudio;
 
 function setupAudio() {
   // background music
-  const musicAudio = new Howl({
+  musicAudio = new Howl({
     src: ["./assets/music.mp3"],
-    autoplay: true,
+    autoplay: false,
     loop: true,
   });
   const musicId = musicAudio.play();
