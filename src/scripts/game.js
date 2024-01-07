@@ -2,7 +2,7 @@ class Game {
   OBSTACLE_PREFAB = new THREE.BoxGeometry(1, 1, 1);
   OBSTACLE_MATERIAL = new THREE.MeshBasicMaterial({ color: 0xccdeee });
   BONUS_PREFAB = new THREE.SphereGeometry(1, 12, 12);
-  COLLISION_THRESHOLD = 0.2;
+  COLLISION_THRESHOLD = 0.4; //0.2;
 
   constructor(scene, camera) {
     this.divScore = document.getElementById("score");
@@ -56,6 +56,7 @@ class Game {
   _reset(replay) {
     // initialize variables
     this.running = false;
+    this.keyDown = null;
 
     this.numberOfObstacles = 50;
     this.numberOfBonuses = 10;
@@ -86,6 +87,12 @@ class Game {
 
   _keydown(event) {
     let newSpeedX;
+
+    if (this.keyDown !== null && this.keyDown !== event.key) {
+      return;
+    }
+    this.keyDown = event.key;
+
     switch (event.key) {
       case "ArrowLeft":
         newSpeedX = -1.0;
@@ -106,7 +113,12 @@ class Game {
     }
   }
 
-  _keyup() {
+  _keyup(event) {
+    if (this.keyDown !== null && event.key !== this.keyDown) {
+      return;
+    }
+
+    this.keyDown = null;
     this.speedX = 0;
     this._rotateShip(0, 0.5);
   }
