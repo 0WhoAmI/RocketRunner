@@ -9,9 +9,8 @@ function setupAudio() {
     src: ["./assets/music.mp3"],
     autoplay: false,
     loop: true,
+    volume: 0.01,
   });
-  const musicId = musicAudio.play();
-  musicAudio.fade(0, 0.01, 500, musicId);
 
   //sound effects
   soundBonusAudio = new Howl({
@@ -24,5 +23,6 @@ function setupAudio() {
 
   soundLastCrashAudio = new Howl({
     src: ["./assets/last-crash-sound.mp3"],
+    volume: 0.5,
   });
 }
