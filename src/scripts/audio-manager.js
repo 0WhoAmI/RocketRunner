@@ -23,6 +23,6 @@ function setupAudio() {
 
   soundLastCrashAudio = new Howl({
     src: ["./assets/last-crash-sound.mp3"],
-    volume: 0.5,
+    volume: 0.3,
   });
 }
