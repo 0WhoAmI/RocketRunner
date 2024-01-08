@@ -12,7 +12,7 @@ git clone https://github.com/0WhoAmI/RocketRunner.git
 2. Navigate to the project directory:
 cd RocketRunner
 
-### First way (Cors blocked music)
+### First way (CORS blocked music)
 3. Navigate to crs in project directory RocketRunner:
 cd RocketRunner\src
 
