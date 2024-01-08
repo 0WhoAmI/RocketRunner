@@ -12,7 +12,7 @@ git clone https://github.com/0WhoAmI/RocketRunner.git
 2. Navigate to the project directory:
 cd RocketRunner
 
-### First way (Cors blocked music - very loud)
+### First way (Cors blocked music)
 3. Navigate to crs in project directory RocketRunner:
 cd RocketRunner\src
 
@@ -25,9 +25,9 @@ cd RocketRunner\src
 Live Server
 
 5. Start Live Server:
- * Shortcut: Ctrl + P
- * Type: ">"
- * Press enter on: "Live Server: Open with Live Server"
+&nbsp;* Shortcut: Ctrl + P
+&nbsp;* Type: ">"
+&nbsp;* Press enter on: "Live Server: Open with Live Server"
 
 6. Open your web browser and go to http://127.0.0.1:5500/src/ to play RocketRunner.
 
