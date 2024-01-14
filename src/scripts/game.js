@@ -1,6 +1,15 @@
 class Game {
-  OBSTACLE_PREFAB = new THREE.BoxGeometry(1, 1, 1);
-  OBSTACLE_MATERIAL = new THREE.MeshBasicMaterial({ color: 0xccdeee });
+  // rectangle
+  // OBSTACLE_PREFAB = new THREE.BoxGeometry(1, 1, 1);
+
+  // tetrahedron
+  OBSTACLE_PREFAB = new THREE.TetrahedronGeometry(0.75, 2);
+  OBSTACLE_MATERIAL = new THREE.MeshStandardMaterial({
+    color: 0x888888,
+    roughness: 0.8,
+    metalness: 0.2,
+  });
+
   BONUS_PREFAB = new THREE.SphereGeometry(1, 12, 12);
   COLLISION_THRESHOLD = 0.4; //0.2;
 
@@ -404,6 +413,10 @@ class Game {
       // first load
       this._createShip(scene);
       this._createGrid(scene);
+
+      const light = new THREE.DirectionalLight(0xffffff, 1);
+      light.position.set(5, 5, 5);
+      scene.add(light);
 
       this.objectsParent = new THREE.Group();
       scene.add(this.objectsParent);
